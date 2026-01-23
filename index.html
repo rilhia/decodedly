@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Decodedly</title>
+  <title>Decodedly | Spy-Craft Edition</title>
   <style>
     /* --- Layout & Theme --- */
     body {
@@ -23,16 +23,18 @@
     }
 
     h2 {
-      font-size: 1.3em;
+      font-size: 1.1em;
       color: #8b949e;
       margin-top: 0.5em;
+      letter-spacing: 1px;
+      text-transform: uppercase;
     }
 
     /* --- Intro Box --- */
     .intro {
       background: #161b22;
       padding: 15px 20px;
-      border-left: 4px solid #58a6ff;
+      border-left: 4px solid #f85149; /* Red for 'Secret' feel */
       margin-bottom: 25px;
       font-size: 0.95em;
     }
@@ -42,8 +44,8 @@
       width: 100%;
       height: 90px;
       margin-bottom: 15px;
-      background: #161b22;
-      color: #c9d1d9;
+      background: #0d1117;
+      color: #58a6ff;
       border: 1px solid #30363d;
       padding: 10px;
       font-family: inherit;
@@ -51,20 +53,36 @@
       resize: vertical;
     }
 
+    textarea:focus {
+        outline: none;
+        border-color: #58a6ff;
+    }
+
     /* --- Buttons --- */
     button {
-      background: #238636;
-      color: white;
-      border: none;
+      background: #21262d;
+      color: #c9d1d9;
+      border: 1px solid #f0f6fc1a;
       padding: 8px 16px;
       font-size: 1em;
       cursor: pointer;
       margin: 5px 5px 15px 0;
       border-radius: 4px;
+      font-family: inherit;
     }
 
     button:hover {
-      background: #2ea043;
+      background: #30363d;
+      border-color: #8b949e;
+    }
+
+    .btn-primary {
+        background: #238636;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #2ea043;
     }
 
     /* --- Status & Output --- */
@@ -72,6 +90,8 @@
       font-weight: bold;
       margin-bottom: 15px;
       color: #ffa657;
+      text-transform: uppercase;
+      font-size: 0.8em;
     }
 
     pre {
@@ -80,12 +100,15 @@
       padding: 10px;
       border: 1px solid #30363d;
       overflow-x: auto;
+      font-size: 0.85em;
     }
 
     .label {
       margin-bottom: 5px;
       font-weight: bold;
       color: #79c0ff;
+      text-transform: uppercase;
+      font-size: 0.85em;
     }
 
     a {
@@ -95,68 +118,58 @@
 </head>
 <body>
 
-  <!-- Title & Tagline -->
   <h1>Decodedly 🔍</h1>
-  <h2>Marketing Speak → What They Meant</h2>
+  <h2>Public Transmission → Hidden Intelligence</h2>
 
-  <!-- Intro Box -->
   <div class="intro">
-    Ever read a post and thought, “That’s not what they really mean”?  
+    <strong>The "Newspaper Code" Protocol:</strong> 
+    In classic espionage, a secret agent might find a hidden message within a mundane newspaper article by using a unique key. 
     <br><br>
-    <strong>Decodedly</strong> lets you reveal the hidden intent behind those overpolished posts.
-    Just paste the original text in the Cipher Text box and use a pre-shared key to decode what was really meant. Click “Decode“ to see the hidden intent.
+    <strong>To Read a Message:</strong> Paste the <em>Public Cover Text</em> (the article) and the <em>Secret Key</em> provided to you. Click <strong>Decode</strong> to reveal the hidden intel.
     <br><br>
-    Or generate your own subversive “translation” by entering text you want to change in the Cipher Text box, your idea of what it “should“ have said in the Output Text box, then click “Generate Key“ to produce the translation key and a URL to this page to reveal the output to others.
+    <strong>To Create a Message:</strong> Enter your <em>Public Cover Text</em> and the <em>Hidden Message</em> you want to bury inside it. Click <strong>Generate Key</strong>. You can then share the key or the URL with your contact to reveal the secret.
   </div>
 
-  <!-- Status Message -->
-  <div class="status" id="status">📝 Ready to decode or encode.</div>
+  <div class="status" id="status">📡 System Ready. Awaiting input...</div>
 
-  <!-- Cipher Text -->
-  <div class="label">🔒 Cipher Text (original post):</div>
-  <textarea id="cipher" placeholder="Paste the original post here"></textarea>
+  <div class="label">📄 Public Cover Text (e.g. Newspaper Snippet):</div>
+  <textarea id="cipher" placeholder="Paste the public text here..."></textarea>
 
-  <!-- Output Text -->
-  <div class="label">📝 Output Text (what they *really* meant):</div>
-  <textarea id="plain" placeholder="Enter your corrected or decoded version"></textarea>
+  <div class="label">👁️ Hidden Message (The Secret Intel):</div>
+  <textarea id="plain" placeholder="Enter the secret message to hide or reveal..."></textarea>
 
-  <!-- Key -->
-  <div class="label">🔑 Key:</div>
-  <textarea id="key" placeholder="Paste the key here or generate it below"></textarea>
+  <div class="label">🔑 Secret Key (One-Time Pad):</div>
+  <textarea id="key" placeholder="Paste key or generate one..."></textarea>
 
-  <!-- Shareable URL + Copy Button -->
-  <div class="label">🔗 Shareable Link:</div>
+  <div class="label">🔗 Secure Transmission Link:</div>
   <div style="display: flex; gap: 10px; align-items: center;">
-    <pre id="shareableUrl" style="flex: 1; margin: 0;">(The key will be encoded here once generated)</pre>
+    <pre id="shareableUrl" style="flex: 1; margin: 0;">(Generate key to create link)</pre>
     <button onclick="copyShareableUrl()" id="copyBtn" style="padding: 6px 12px;">📋 Copy</button>
   </div>
 
-  <!-- Action Buttons -->
-  <button onclick="generateKey()">🔑 Generate Key</button>
-  <button onclick="encodeText()">🔐 Encode</button>
+  <button class="btn-primary" onclick="generateKey()">🔑 Generate Key</button>
   <button onclick="decodeText()">🔓 Decode</button>
+  <button onclick="encodeText()">🔐 Encode (Custom)</button>
 
 
   <script>
-    // --- Character Set: Printable ASCII 32–126 ---
+    /* Logic remains consistent with your original script to ensure compatibility */
     const CHARSET = [];
     for (let i = 32; i <= 126; i++) CHARSET.push(String.fromCharCode(i));
     const CHARSET_LEN = CHARSET.length;
 
-    // --- Helpers ---
     const charToIndex = c => CHARSET.indexOf(c);
     const indexToChar = i => CHARSET[i % CHARSET_LEN];
     const sanitize = str => Array.from(str).filter(c => charToIndex(c) !== -1).join('');
     const repeatKey = (key, length) =>
       key.length === 0 ? '' : Array.from({ length }, (_, i) => key[i % key.length]).join('');
 
-    // --- Generate Key from Cipher and Output ---
     function generateKey() {
       const cipher = sanitize(document.getElementById('cipher').value);
       const plain = sanitize(document.getElementById('plain').value);
 
       if (plain.length > cipher.length) {
-        document.getElementById('status').textContent = "⚠️ Output cannot be longer than Ciphertext.";
+        document.getElementById('status').textContent = "❌ ERROR: Cover text must be longer than Hidden Message.";
         return;
       }
 
@@ -171,21 +184,19 @@
       }
 
       document.getElementById('key').value = key;
-      document.getElementById('status').textContent = "✅ Key generated.";
+      document.getElementById('status').textContent = "✅ KEY GENERATED. Transmission ready.";
 
-      // Encode key safely for URL use (Base64 + URI encoding)
       const encodedKey = encodeURIComponent(btoa(key));
       const baseUrl = `${window.location.origin}${window.location.pathname}`;
       document.getElementById('shareableUrl').textContent = `${baseUrl}?vkey=${encodedKey}`;
     }
 
-    // --- Encode Output using Key (Vigenère-like) ---
     function encodeText() {
       const plain = sanitize(document.getElementById('plain').value);
       const key = repeatKey(sanitize(document.getElementById('key').value), plain.length);
 
       if (!plain || !key) {
-        document.getElementById('status').textContent = "⚠️ Need both Output and Key to encode.";
+        document.getElementById('status').textContent = "⚠️ Missing hidden message or key.";
         return;
       }
 
@@ -197,16 +208,15 @@
       }
 
       document.getElementById('cipher').value = encrypted;
-      document.getElementById('status').textContent = "✅ Ciphertext generated.";
+      document.getElementById('status').textContent = "✅ Cover text generated.";
     }
 
-    // --- Decode Cipher using Key ---
     function decodeText() {
       const cipher = sanitize(document.getElementById('cipher').value);
       const key = repeatKey(sanitize(document.getElementById('key').value), cipher.length);
 
       if (!cipher || !key) {
-        document.getElementById('status').textContent = "⚠️ Need both Ciphertext and Key to decode.";
+        document.getElementById('status').textContent = "⚠️ Missing cover text or key.";
         return;
       }
 
@@ -218,27 +228,24 @@
       }
 
       document.getElementById('plain').value = decrypted;
-      document.getElementById('status').textContent = "✅ Output generated.";
+      document.getElementById('status').textContent = "✅ INTELLIGENCE REVEALED.";
     }
 
-    // --- Get URL Parameter ---
     function getQueryParam(param) {
       const params = new URLSearchParams(window.location.search);
       return params.get(param);
     }
 
-    // --- Copy Shareable URL to Clipboard ---
     function copyShareableUrl() {
       const text = document.getElementById('shareableUrl').textContent;
       navigator.clipboard.writeText(text).then(() => {
         const btn = document.getElementById('copyBtn');
         const original = btn.textContent;
-        btn.textContent = '✔ Copied!';
+        btn.textContent = '✔ Copied';
         setTimeout(() => btn.textContent = original, 1500);
       });
     }
 
-    // --- On Load: Load Key from URL if present ---
     window.onload = () => {
       const vkey = getQueryParam('vkey');
       if (vkey !== null) {
@@ -255,7 +262,7 @@
         const baseUrl = `${window.location.origin}${window.location.pathname}`;
         const safeKey = encodeURIComponent(btoa(cleanKey));
         document.getElementById('shareableUrl').textContent = `${baseUrl}?vkey=${safeKey}`;
-        document.getElementById('status').textContent = "🔑 Key loaded from URL. Paste Ciphertext and click Decode.";
+        document.getElementById('status').textContent = "🔑 Key loaded from secure link. Paste cover text to reveal.";
       }
     };
   </script>
