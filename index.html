@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Decodedly</title>
+  <style>
+    /* --- Layout & Theme --- */
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background: #0d1117;
+      color: #c9d1d9;
+      padding: 40px 20px;
+      max-width: 800px;
+      margin: auto;
+      line-height: 1.5;
+    }
+
+    /* --- Header Styles --- */
+    h1 {
+      font-size: 2em;
+      margin-bottom: 0.2em;
+      color: #58a6ff;
+    }
+
+    h2 {
+      font-size: 1.3em;
+      color: #8b949e;
+      margin-top: 0.5em;
+    }
+
+    /* --- Intro Box --- */
+    .intro {
+      background: #161b22;
+      padding: 15px 20px;
+      border-left: 4px solid #58a6ff;
+      margin-bottom: 25px;
+      font-size: 0.95em;
+    }
+
+    /* --- Input Areas --- */
+    textarea {
+      width: 100%;
+      height: 90px;
+      margin-bottom: 15px;
+      background: #161b22;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 1em;
+      resize: vertical;
+    }
+
+    /* --- Buttons --- */
+    button {
+      background: #238636;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 1em;
+      cursor: pointer;
+      margin: 5px 5px 15px 0;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background: #2ea043;
+    }
+
+    /* --- Status & Output --- */
+    .status {
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #ffa657;
+    }
+
+    pre {
+      background: #161b22;
+      color: #c9d1d9;
+      padding: 10px;
+      border: 1px solid #30363d;
+      overflow-x: auto;
+    }
+
+    .label {
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #79c0ff;
+    }
+
+    a {
+      color: #58a6ff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Title & Tagline -->
+  <h1>Decodedly 🔍</h1>
+  <h2>Marketing Speak → What They Meant</h2>
+
+  <!-- Intro Box -->
+  <div class="intro">
+    Ever read a post and thought, “That’s not what they really mean”?  
+    <br><br>
+    <strong>Decodedly</strong> lets you reveal the hidden intent behind those overpolished posts.
+    Just paste the original text in the Cipher Text box and use a pre-shared key to decode what was really meant. Click “Decode“ to see the hidden intent.
+    <br><br>
+    Or generate your own subversive “translation” by entering text you want to change in the Cipher Text box, your idea of what it “should“ have said in the Output Text box, then click “Generate Key“ to produce the translation key and a URL to this page to reveal the output to others.
+  </div>
+
+  <!-- Status Message -->
+  <div class="status" id="status">📝 Ready to decode or encode.</div>
+
+  <!-- Cipher Text -->
+  <div class="label">🔒 Cipher Text (original post):</div>
+  <textarea id="cipher" placeholder="Paste the original post here"></textarea>
+
+  <!-- Output Text -->
+  <div class="label">📝 Output Text (what they *really* meant):</div>
+  <textarea id="plain" placeholder="Enter your corrected or decoded version"></textarea>
+
+  <!-- Key -->
+  <div class="label">🔑 Key:</div>
+  <textarea id="key" placeholder="Paste the key here or generate it below"></textarea>
+
+  <!-- Shareable URL + Copy Button -->
+  <div class="label">🔗 Shareable Link:</div>
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <pre id="shareableUrl" style="flex: 1; margin: 0;">(The key will be encoded here once generated)</pre>
+    <button onclick="copyShareableUrl()" id="copyBtn" style="padding: 6px 12px;">📋 Copy</button>
+  </div>
+
+  <!-- Action Buttons -->
+  <button onclick="generateKey()">🔑 Generate Key</button>
+  <button onclick="encodeText()">🔐 Encode</button>
+  <button onclick="decodeText()">🔓 Decode</button>
+
+
+  <script>
+    // --- Character Set: Printable ASCII 32–126 ---
+    const CHARSET = [];
+    for (let i = 32; i <= 126; i++) CHARSET.push(String.fromCharCode(i));
+    const CHARSET_LEN = CHARSET.length;
+
+    // --- Helpers ---
+    const charToIndex = c => CHARSET.indexOf(c);
+    const indexToChar = i => CHARSET[i % CHARSET_LEN];
+    const sanitize = str => Array.from(str).filter(c => charToIndex(c) !== -1).join('');
+    const repeatKey = (key, length) =>
+      key.length === 0 ? '' : Array.from({ length }, (_, i) => key[i % key.length]).join('');
+
+    // --- Generate Key from Cipher and Output ---
+    function generateKey() {
+      const cipher = sanitize(document.getElementById('cipher').value);
+      const plain = sanitize(document.getElementById('plain').value);
+
+      if (plain.length > cipher.length) {
+        document.getElementById('status').textContent = "⚠️ Output cannot be longer than Ciphertext.";
+        return;
+      }
+
+      const cipherPart = cipher.slice(0, plain.length);
+      let key = '';
+      for (let i = 0; i < plain.length; i++) {
+        const cIndex = charToIndex(cipherPart[i]);
+        const pIndex = charToIndex(plain[i]);
+        if (cIndex === -1 || pIndex === -1) return;
+        const shift = (cIndex - pIndex + CHARSET_LEN) % CHARSET_LEN;
+        key += indexToChar(shift);
+      }
+
+      document.getElementById('key').value = key;
+      document.getElementById('status').textContent = "✅ Key generated.";
+
+      // Encode key safely for URL use (Base64 + URI encoding)
+      const encodedKey = encodeURIComponent(btoa(key));
+      const baseUrl = `${window.location.origin}${window.location.pathname}`;
+      document.getElementById('shareableUrl').textContent = `${baseUrl}?vkey=${encodedKey}`;
+    }
+
+    // --- Encode Output using Key (Vigenère-like) ---
+    function encodeText() {
+      const plain = sanitize(document.getElementById('plain').value);
+      const key = repeatKey(sanitize(document.getElementById('key').value), plain.length);
+
+      if (!plain || !key) {
+        document.getElementById('status').textContent = "⚠️ Need both Output and Key to encode.";
+        return;
+      }
+
+      let encrypted = '';
+      for (let i = 0; i < plain.length; i++) {
+        const pIndex = charToIndex(plain[i]);
+        const kIndex = charToIndex(key[i]);
+        encrypted += indexToChar((pIndex + kIndex) % CHARSET_LEN);
+      }
+
+      document.getElementById('cipher').value = encrypted;
+      document.getElementById('status').textContent = "✅ Ciphertext generated.";
+    }
+
+    // --- Decode Cipher using Key ---
+    function decodeText() {
+      const cipher = sanitize(document.getElementById('cipher').value);
+      const key = repeatKey(sanitize(document.getElementById('key').value), cipher.length);
+
+      if (!cipher || !key) {
+        document.getElementById('status').textContent = "⚠️ Need both Ciphertext and Key to decode.";
+        return;
+      }
+
+      let decrypted = '';
+      for (let i = 0; i < cipher.length; i++) {
+        const cIndex = charToIndex(cipher[i]);
+        const kIndex = charToIndex(key[i]);
+        decrypted += indexToChar((cIndex - kIndex + CHARSET_LEN) % CHARSET_LEN);
+      }
+
+      document.getElementById('plain').value = decrypted;
+      document.getElementById('status').textContent = "✅ Output generated.";
+    }
+
+    // --- Get URL Parameter ---
+    function getQueryParam(param) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(param);
+    }
+
+    // --- Copy Shareable URL to Clipboard ---
+    function copyShareableUrl() {
+      const text = document.getElementById('shareableUrl').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyBtn');
+        const original = btn.textContent;
+        btn.textContent = '✔ Copied!';
+        setTimeout(() => btn.textContent = original, 1500);
+      });
+    }
+
+    // --- On Load: Load Key from URL if present ---
+    window.onload = () => {
+      const vkey = getQueryParam('vkey');
+      if (vkey !== null) {
+        let decoded;
+        try {
+          decoded = atob(decodeURIComponent(vkey));
+        } catch (e) {
+          decoded = '';
+        }
+
+        const cleanKey = sanitize(decoded);
+        document.getElementById('key').value = cleanKey;
+
+        const baseUrl = `${window.location.origin}${window.location.pathname}`;
+        const safeKey = encodeURIComponent(btoa(cleanKey));
+        document.getElementById('shareableUrl').textContent = `${baseUrl}?vkey=${safeKey}`;
+        document.getElementById('status').textContent = "🔑 Key loaded from URL. Paste Ciphertext and click Decode.";
+      }
+    };
+  </script>
+</body>
+</html>
