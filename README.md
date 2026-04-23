@@ -1,3 +1,4 @@
+![Main Header Logo](images/decodedly.jpeg)
 # Decodedly — Spy-Craft Edition
 
 *Public Transmission → Hidden Intelligence*
